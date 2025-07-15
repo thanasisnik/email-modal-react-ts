@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+    --color-email-blue: #428cc6;
+    --color-email-border: #ccd9eb;
+    --color-button-blue: #428cc6;
+    --color-button-text-blue: #428cc6;
+    --color-button-border-blue: #428cc6;
+}
+
+
+.scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
