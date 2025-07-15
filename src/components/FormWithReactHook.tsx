@@ -132,7 +132,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
     return (
         <>
-            <div className="container mx-auto bg-white w-full px-4 py-2">
+            <div className="bg-white w-full max-w-full px-4 py-2 overflow-hidden">
                 <div className="flex justify-between border-b border-gray-300 pb-2 mb-6">
                     <h1 className=" font-semibold text-2xl text-gray-700 my-4">Email sent Form</h1>
                     <button
@@ -144,15 +144,15 @@ const FormWithReactHook = ({onClose} : Props) => {
 
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="min-w-4xl min-h-[70vh] flex flex-col space-y-6 ">
+                    className="w-full max-w-full flex flex-col space-y-6 ">
                     {/* Το πρώτο κομμάτι με τη λίστα παραληπτών*/}
-                    <div>
-                        <h2 className="font-semibold text-gray-700">List of recipients</h2>
+                    <div className="flex flex-col w-full">
+                        <h2 className="font-semibold text-gray-700 mb-1">List of recipients</h2>
                         {/* Εδώ έχουμε ενα div για να εμφανίζεται η λίστα παραληπτών*/}
-                        <div className="border border-gray-500 rounded-md h-[130px] min-w-4xl overflow-auto  max-w-3xl flex flex-wrap space-x-4 space-y-2 py-2 px-1">
+                        <div className="border border-gray-500 rounded-md h-[130px] w-full overflow-auto flex flex-wrap gap-2 py-2 px-1">
                             {/* Εδώ θα μπαινουν οι παραλήπτες   */}
                             {users.map(user => (
-                                <p className="border-2 border-email-border rounded max-h-10 py-1 px-2 text-sm text-email-blue font-semibold flex items-center">
+                                <p key={user.id} className="border-2 border-email-border rounded max-h-10 py-1 px-2 text-sm text-email-blue font-semibold flex items-center">
                                     {user.email}
                                     <button
                                         type="button"
@@ -166,7 +166,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
                         </div>
 
-                        <div className="flex flex-col">
+                        <div className="flex flex-col w-full">
                             <input
                                 {...register("email")} // name = "email"
                                 placeholder="Type name or email"
@@ -189,7 +189,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                                 </ul>
                             )}
 
-                            <div className="space-x-4 flex mt-4">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 mt-4">
                                 <button
                                     type="button"
                                     onClick={enterAll}
@@ -240,7 +240,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                     </div>
 
 
-                    <div className="space-x-4 flex justify-end border-t border-gray-300 mt-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end border-t border-gray-300 mt-4 pt-4">
                         <button
                             type="button"
                             className="border border-button-border-blue rounded-lg text-button-text-blue font-semibold text-sm px-3 py-2 mt-3 hover:scale-105 transition duration-300 cursor-pointer"
