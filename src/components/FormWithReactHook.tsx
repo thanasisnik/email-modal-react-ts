@@ -132,7 +132,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
     return (
         <>
-            <div className="bg-white w-full max-w-full px-4 py-2 overflow-hidden">
+            <div className="bg-white w-full mx-auto px-4 py-2 overflow-hidden">
                 <div className="flex justify-between border-b border-gray-300 pb-2 mb-6">
                     <h1 className=" font-semibold text-2xl text-gray-700 my-4">Email sent Form</h1>
                     <button
@@ -144,7 +144,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="w-full max-w-full flex flex-col space-y-6 ">
+                    className="w-full flex flex-col space-y-6 ">
                     {/* Το πρώτο κομμάτι με τη λίστα παραληπτών*/}
                     <div className="flex flex-col w-full">
                         <h2 className="font-semibold text-gray-700 mb-1">List of recipients</h2>

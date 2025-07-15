@@ -17,7 +17,7 @@ const Dialog = () => {
 
             <div className="w-full h-full min-h-[95vh] flex flex-col items-center justify-center">
                 <dialog ref={dialogRef} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                 p-5 border border-blue-500 rounded bg-white">
+                                                 p-5 border border-blue-500 rounded bg-white w-[95vw] max-w-4xl max-h-[90vh] overflow-auto">
 
                     <FormWithReactHook onClose={() => dialogRef.current?.close()} />
                 </dialog>
