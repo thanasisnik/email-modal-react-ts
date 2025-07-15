@@ -53,7 +53,6 @@ const FormWithReactHook = ({onClose} : Props) => {
         setValue,
         reset,
         watch,
-        clearErrors
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema), // Δηλώνουμε στον resolver οτι χρησιμοποίησε  για validator το zod schema
         defaultValues: initValues,
@@ -86,14 +85,15 @@ const FormWithReactHook = ({onClose} : Props) => {
         })
         setUsers([]);
         reset();
-        clearErrors();
+
     }
 
     // Χρήση της onClear για να κάνουμε cancel και να καθαρίσουμε όλη την φόρμα.
     const onClear = () => {
         setUsers([]);
-        reset(initValues, {keepErrors: false});
-        clearErrors();
+        setSubmittedData(null);
+        reset();
+
     }
 
     // Εισαγωγή όλων των χρηστών στους παραλήπτες με το button enter all.
