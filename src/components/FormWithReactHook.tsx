@@ -52,13 +52,13 @@ const FormWithReactHook = ({onClose} : Props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const {
-        register,
+        register, // Είναι σαν το name="value"
         handleSubmit,
         formState: {errors},
         setError,
         setValue,
         reset,
-        watch,
+        watch, // Παρακολουθεί live το input σαν να έχουμε onChange.
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema), // Δηλώνουμε στον resolver οτι χρησιμοποίησε  για validator το zod schema
         defaultValues: initValues,
@@ -83,6 +83,7 @@ const FormWithReactHook = ({onClose} : Props) => {
         setAutoComplete(filtered);
     }, [emailInput, allUsers]);
 
+    // Χρήση της onSubmit στην handleSubmit() για να ελέγξουμε οτι υπάρχει τουλάχιστον ένας παραλήπτης και να περάσουμε τα data της φόρμας στο submittedData ώστε να τα εμφανίσουμε.
     const onSubmit = (data: FormValues) => {
         if (users.length === 0) {
             setError("email", {message: "Please enter at least a valid email"});
@@ -111,12 +112,13 @@ const FormWithReactHook = ({onClose} : Props) => {
 
     // Εισαγωγή όλων των χρηστών στους παραλήπτες με το button enter all.
     const enterAll = () => {
+        // Ενεργοποιούμε το loading state για να εμφανιστεί στον χρήστη.
         setIsLoading(true);
 
+        // Καλούμε το API για να πάρουμε τους χρήστες και να τους περάσουμε στο state. Οταν ολοκληρωθεί αλλάζουμε και το state του loading.
         getUsers()
             .then(users => setUsers(users))
             .finally(() => setIsLoading(false));
-
     }
 
     // Καθαρισμός του πεδίου με τους παραλήπτες με το button remove all.
@@ -142,6 +144,8 @@ const FormWithReactHook = ({onClose} : Props) => {
             const exists = prev.some( u => u.email === user.email);
             if (!exists) return prev;
 
+            // Η .filter() επιστρέφει έναν νέο πίνακα που περιέχει ότι πληρεί τη συνθήκη. Δηλαδή ο νέος πίνακας περιλαμβάνει όλα τα email
+            // που δεν είναι ίδιο με αυτό που αφαιρούμε
             return prev.filter(u => u.email !== user.email);
         });
     };
@@ -152,6 +156,7 @@ const FormWithReactHook = ({onClose} : Props) => {
             <div className="bg-white w-full mx-auto px-4 py-2 overflow-hidden">
                 <div className="flex justify-between border-b border-gray-300 pb-2 mb-6">
                     <h1 className=" font-semibold text-2xl text-gray-700 my-4">Email sent Form</h1>
+                    {/* Το button για να κλείσουμε το modal. */}
                     <button
                         type="button"
                         className="text-button-blue font-semibold p-2 "
@@ -162,13 +167,14 @@ const FormWithReactHook = ({onClose} : Props) => {
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="w-full flex flex-col space-y-6 ">
+
                     {/* Το πρώτο κομμάτι με τη λίστα παραληπτών*/}
                     <div className="flex flex-col w-full">
                         <h2 className="font-semibold text-gray-700 mb-1">List of recipients</h2>
                         {/* Εδώ έχουμε ενα div για να εμφανίζεται η λίστα παραληπτών*/}
                         <div className="border border-gray-500 rounded-md h-[130px] w-full overflow-auto flex flex-wrap gap-2 py-2 px-1">
 
-                            {/* Εδώ θα μπαινουν οι παραλήπτες   */}
+                            {/* Εμφανίζει τους χρήστες που έχουν προστεθεί ως παραλήπτες, και κάθε στοιχείο έχει κουμπί για διαγραφή του χρήστη από τη λίστα. */}
                             {users.map(user => (
                                 <p key={user.id} className="border-2 border-email-border rounded max-h-10 py-1 px-2 text-sm text-email-blue font-semibold flex items-center">
                                     {user.email}
@@ -185,12 +191,14 @@ const FormWithReactHook = ({onClose} : Props) => {
                         </div>
 
                         <div className="flex flex-col w-full">
+                            {/* Το πεδίο για την αναζήτηση παραλήπτη με βάση το όνομα ή το email */}
                             <input
                                 {...register("email")} // name = "email"
                                 placeholder="Type name or email"
                                 autoComplete="off"
                                 className="border border-gray-500 text-gray-900 rounded-md min-h-[40px] px-2 mt-2"
                             />
+                            {/* Εμφανίζεται οταν υπάρχει input και ταιριάζει με χρήστες. Με κλικ σε ένα στοιχείο γίνεται προσθήκη στους παραλήπτες. */}
                             {emailInput && autoComplete.length > 0 && (
                                 <ul className="max-w-md max-h-[150px] py-1 px-0.5 overflow-auto scrollbar-hidden" >
                                     {autoComplete.map(user => (
@@ -208,6 +216,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                                 </ul>
                             )}
 
+                            {/* Buttons για την προσθήκη όλων των χρηστών με loading state και για τον καθαρισμό της λίστας. */}
                             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 mt-4">
                                 <button
                                     type="button"
@@ -235,7 +244,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
                     </div>
 
-                    {/* Το δεύτερο κομμάτι με το ΘΕΜΑ   */}
+                    {/* Το δεύτερο κομμάτι με το Subject. Είναι required.   */}
                     <div className="flex flex-col">
                         <label className="font-semibold text-gray-800" htmlFor="subject" >Subject <span className="text-red-500 font-semibold">*</span></label>
                         <input
@@ -248,7 +257,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                         )}
                     </div>
 
-                    {/*  Το τρίτο κομμάτι με το Body  */}
+                    {/*  Το τρίτο κομμάτι με το Body. Required με min/max χαρακτήρες.  */}
                     <div className="flex flex-col">
                         <label className="font-semibold text-gray-800" htmlFor="description">Body of text</label>
                         <textarea
@@ -264,14 +273,22 @@ const FormWithReactHook = ({onClose} : Props) => {
 
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:justify-end border-t border-gray-300 mt-4 pt-4">
+                        {/* Button που ακυρώνει, καθαρίζει όλα τα πεδία */}
                         <button
                             type="button"
                             className="border border-button-border-blue rounded-lg text-button-text-blue font-semibold text-sm px-3 py-2 mt-3 hover:scale-105 transition duration-300 cursor-pointer"
                             onClick={onClear}
                         >CANCEL</button>
-                        <button className="bg-button-blue rounded-lg text-white font-semibold text-sm px-3 py-2 mt-3 hover:scale-105 transition duration-300 cursor-pointer">SUBMIT</button>
+
+                        <button
+                            className="bg-button-blue rounded-lg text-white font-semibold text-sm px-3 py-2 mt-3 hover:scale-105 transition duration-300 cursor-pointer"
+                        >
+                            SUBMIT
+                        </button>
                     </div>
                 </form>
+
+                {/* Εκτυπώνουμε όλα τα στοιχεία μετά το submit για επιβεβαίωση της φόρμας. Fake form submission */}
                 {submittedData && (
                     <div>
                         <h2 className="font-bold text-xl mt-6">Submitted Data</h2>
