@@ -3,8 +3,9 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {getUsers} from "../api/users.ts";
 import type {User} from "../api/users.ts";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import { CircleX } from 'lucide-react';
+import {useAutoComplete} from "../hooks/useAutoComplete.ts";
 
 
 // Χρησιμοποιούμε zod για να κάνουμε το validation. Πρώτα ορίζουμε το σχήμα.
@@ -46,8 +47,8 @@ const initValues = {
 
 const FormWithReactHook = ({onClose} : Props) => {
     const [users, setUsers] = useState<User[]>([]) // Το state για τους παραλήπτες
-    const [allUsers, setAllUsers] = useState<User[]>([]) // Το state για να κρατάμε όλους τους χρήστες από το API.
-    const [autoComplete, setAutoComplete] = useState<User[]>([]) // Το state για να διαχειριστούμε το suggestion list όταν ο χρήστης θέλει να εισάγει κάποιον στους παραλήπτες.
+    // const [allUsers, setAllUsers] = useState<User[]>([]) // Το state για να κρατάμε όλους τους χρήστες από το API.
+    // const [autoComplete, setAutoComplete] = useState<User[]>([]) // Το state για να διαχειριστούμε το suggestion list όταν ο χρήστης θέλει να εισάγει κάποιον στους παραλήπτες.
     const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null) // Το state για να εκτυπώσουμε το submit.
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -66,22 +67,7 @@ const FormWithReactHook = ({onClose} : Props) => {
 
     // Με το watch του useForm, μπορούμε να παρακολουθούμε live τις αλλαγές στο πεδίο, σαν να είχαμε onChange.
     const emailInput = watch("email");
-
-    // Χρήση της useEffect χωρίς dependencies. Μας επιτρέπει όταν ανοίγουμε τη σελίδα να τρέξουμε αυτό το effect όπου θα καλέσει την getUsers και έπειτα να κάνουμε set το state με τους users.
-    useEffect(() => {
-        getUsers()
-            .then(allUsers => setAllUsers(allUsers))
-    }, [])
-
-    // Χρήση της useEffect με dependencies. Τρέχει κάθε φορά που βλέπει αλλαγή στο emailInput, και φιλτράρει με το email ή το name, για να περάσει τους
-    // κατάλληλους χρήστες στο suggestion list.
-    useEffect(() => {
-        const filtered = allUsers.filter(user =>
-            user.email.toLowerCase().includes(emailInput?.toLowerCase() || "") ||
-            user.name.toLowerCase().includes(emailInput?.toLowerCase() || "")
-        );
-        setAutoComplete(filtered);
-    }, [emailInput, allUsers]);
+    const { autoCompleteUsers } = useAutoComplete(emailInput || "");
 
     // Χρήση της onSubmit στην handleSubmit() για να ελέγξουμε οτι υπάρχει τουλάχιστον ένας παραλήπτης και να περάσουμε τα data της φόρμας στο submittedData ώστε να τα εμφανίσουμε.
     const onSubmit = (data: FormValues) => {
@@ -90,16 +76,14 @@ const FormWithReactHook = ({onClose} : Props) => {
             return;
         }
 
-        if (users.length > 0) {
-            setSubmittedData({
-                subject: data.subject,
-                description: data.description,
-                recipients: users
-            })
-            setUsers([]);
-            reset();
-        }
+        setSubmittedData({
+            subject: data.subject,
+            description: data.description,
+            recipients: users
+        });
 
+        setUsers([]);
+        reset();
     }
 
     // Χρήση της onClear για να κάνουμε cancel και να καθαρίσουμε όλη την φόρμα.
@@ -126,7 +110,7 @@ const FormWithReactHook = ({onClose} : Props) => {
         setUsers([]);
     };
 
-    // Χρήση για να διαχειριστούμε το suggestion list. Δηλαδή να μπορούμε να κλικάρουμε έναν user και αυτός να περνάει στη λίστα παραληπτών.
+    // Χρήση της συνάρτησης για να διαχειριστούμε το suggestion list. Δηλαδή να μπορούμε να κλικάρουμε έναν user και αυτός να περνάει στη λίστα παραληπτών.
     const handleAutoComplete = (user: User) => {
         // Αρχικά ελέγχουμε αν υπάρχει ο χρήστης αλλιώς τον προσθέτουμε.
         setUsers(prev => {
@@ -135,7 +119,6 @@ const FormWithReactHook = ({onClose} : Props) => {
             return [...prev, user];
         })
         setValue("email", "")
-        setAutoComplete([])
     }
 
     // Χρήση της συνάρτησης για να διαγράψουμε έναν user απο τη λίστα παραληπτών.
@@ -199,9 +182,9 @@ const FormWithReactHook = ({onClose} : Props) => {
                                 className="border border-gray-500 text-gray-900 rounded-md min-h-[40px] px-2 mt-2"
                             />
                             {/* Εμφανίζεται οταν υπάρχει input και ταιριάζει με χρήστες. Με κλικ σε ένα στοιχείο γίνεται προσθήκη στους παραλήπτες. */}
-                            {emailInput && autoComplete.length > 0 && (
+                            {emailInput && autoCompleteUsers.length > 0 && (
                                 <ul className="max-w-md max-h-[150px] py-1 px-0.5 overflow-auto scrollbar-hidden" >
-                                    {autoComplete.map(user => (
+                                    {autoCompleteUsers.map(user => (
                                         <li
                                             key={user.id}
                                             onClick={ () => handleAutoComplete(user)}
