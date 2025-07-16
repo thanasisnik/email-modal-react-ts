@@ -10,7 +10,10 @@ import { CircleX } from 'lucide-react';
 // Χρησιμοποιούμε zod για να κάνουμε το validation. Πρώτα ορίζουμε το σχήμα.
 const formSchema = z.object({
     // Το z.email() του zod αν δεν του περάσουμε regex, το default είναι /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i
-    email: z.email("Please enter a valid email"),
+    email: z
+        .email("Please enter a valid email")
+        .optional()
+        .or(z.literal("")),
     subject: z
         .string()
         .nonempty("Subject is required."),
@@ -46,10 +49,13 @@ const FormWithReactHook = ({onClose} : Props) => {
     const [allUsers, setAllUsers] = useState<User[]>([]) // Το state για να κρατάμε όλους τους χρήστες από το API.
     const [autoComplete, setAutoComplete] = useState<User[]>([]) // Το state για να διαχειριστούμε το suggestion list όταν ο χρήστης θέλει να εισάγει κάποιον στους παραλήπτες.
     const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null) // Το state για να εκτυπώσουμε το submit.
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const {
         register,
         handleSubmit,
         formState: {errors},
+        setError,
         setValue,
         reset,
         watch,
@@ -71,20 +77,27 @@ const FormWithReactHook = ({onClose} : Props) => {
     // κατάλληλους χρήστες στο suggestion list.
     useEffect(() => {
         const filtered = allUsers.filter(user =>
-            user.email.toLowerCase().includes(emailInput.toLowerCase() || "") ||
-            user.name.toLowerCase().includes(emailInput.toLowerCase() || "")
+            user.email.toLowerCase().includes(emailInput?.toLowerCase() || "") ||
+            user.name.toLowerCase().includes(emailInput?.toLowerCase() || "")
         );
         setAutoComplete(filtered);
     }, [emailInput, allUsers]);
 
     const onSubmit = (data: FormValues) => {
-        setSubmittedData({
-            subject: data.subject,
-            description: data.description,
-            recipients: users
-        })
-        setUsers([]);
-        reset();
+        if (users.length === 0) {
+            setError("email", {message: "Please enter at least a valid email"});
+            return;
+        }
+
+        if (users.length > 0) {
+            setSubmittedData({
+                subject: data.subject,
+                description: data.description,
+                recipients: users
+            })
+            setUsers([]);
+            reset();
+        }
 
     }
 
@@ -98,8 +111,12 @@ const FormWithReactHook = ({onClose} : Props) => {
 
     // Εισαγωγή όλων των χρηστών στους παραλήπτες με το button enter all.
     const enterAll = () => {
+        setIsLoading(true);
+
         getUsers()
             .then(users => setUsers(users))
+            .finally(() => setIsLoading(false));
+
     }
 
     // Καθαρισμός του πεδίου με τους παραλήπτες με το button remove all.
@@ -115,7 +132,7 @@ const FormWithReactHook = ({onClose} : Props) => {
             if (exists) return prev;
             return [...prev, user];
         })
-        setValue("email", user.email)
+        setValue("email", "")
         setAutoComplete([])
     }
 
@@ -150,6 +167,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                         <h2 className="font-semibold text-gray-700 mb-1">List of recipients</h2>
                         {/* Εδώ έχουμε ενα div για να εμφανίζεται η λίστα παραληπτών*/}
                         <div className="border border-gray-500 rounded-md h-[130px] w-full overflow-auto flex flex-wrap gap-2 py-2 px-1">
+
                             {/* Εδώ θα μπαινουν οι παραλήπτες   */}
                             {users.map(user => (
                                 <p key={user.id} className="border-2 border-email-border rounded max-h-10 py-1 px-2 text-sm text-email-blue font-semibold flex items-center">
@@ -170,6 +188,7 @@ const FormWithReactHook = ({onClose} : Props) => {
                             <input
                                 {...register("email")} // name = "email"
                                 placeholder="Type name or email"
+                                autoComplete="off"
                                 className="border border-gray-500 text-gray-900 rounded-md min-h-[40px] px-2 mt-2"
                             />
                             {emailInput && autoComplete.length > 0 && (
@@ -193,13 +212,17 @@ const FormWithReactHook = ({onClose} : Props) => {
                                 <button
                                     type="button"
                                     onClick={enterAll}
-                                    className="bg-button-blue rounded-lg text-white font-semibold text-sm px-3 py-2 hover:scale-105 transition duration-300 cursor-pointer">ENTER ALL CUSTOMERS</button>
+                                    disabled={isLoading}
+                                    className="bg-button-blue rounded-lg text-white font-semibold text-sm px-3 py-2 hover:scale-105 transition duration-300 cursor-pointer"
+                                >
+                                    {isLoading? "Loading..." : "ENTER ALL CUSTOMERS"}
+                                </button>
                                 <button
                                     type="button"
                                     onClick={clearAll}
                                     className="border border-button-border-blue rounded-lg text-button-text-blue font-semibold text-sm px-3 py-2 hover:scale-105 transition duration-300 cursor-pointer "
                                 >
-                                    REMOVE ALL CLIENTS
+                                    REMOVE ALL CUSTOMERS
                                 </button>
                             </div>
 
