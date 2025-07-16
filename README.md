@@ -1,3 +1,36 @@
+# Email Form modal
+A simple React + Typescript modal form.
+## Installation
+Follow the steps below to run the project locally:
+1. Clone the repository
+```
+git clone https://github.com/thanasisnik/email-modal-react-ts.git
+cd email-modal-react-ts
+```
+   
+2. Install the dependencies 
+```
+npm install
+```
+
+3. Set up environment variables
+Create a .env file in the root directory and add the following:
+```
+VITE_API_URL=https://example.com/api
+```
+4. Run the development server
+```
+npm run dev
+```
+
+
+
+
+
+
+
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
